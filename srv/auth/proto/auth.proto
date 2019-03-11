@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package auth;
+
+service auth {
+    rpc Login(UserRequest) returns (LoginResponse) {}
+    rpc Register(UserRequest) returns (Response) {}
+    rpc CheckPermissions(CheckPermissionsRequest) returns (Response) {}
+    rpc ChangePassword(ChangePasswordRequest) returns (Response) {}
+    rpc SetPermission(SetPermissionRequest) returns (Response) {}
+    rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {}
+}
+
+message VerifyTokenRequest {
+    string token = 1;
+}
+
+message VerifyTokenResponse {
+    string userID = 1;
+}
+
+message UserRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message Response {
+}
+
+message LoginResponse {
+    string token = 1;
+}
+
+message CheckPermissionsRequest {
+    string token = 1;
+    repeated string permissionTags = 2;
+}
+
+message ChangePasswordRequest {
+    string userID = 1;
+    string newPassword = 2;
+}
+
+message SetPermissionRequest {
+    string userID = 1;
+    string permissionTag = 2;
+    bool grant = 3;
+}
