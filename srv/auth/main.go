@@ -1,18 +1,58 @@
 package main
 
 import (
+	"time"
+
+	"github.com/joho/godotenv"
+
+	"github.com/senonerk/sup/srv/auth/db"
+
 	"github.com/micro/go-log"
 	"github.com/micro/go-micro"
-	"github.com/senonerk/sup/srv/auth/handler"
 
+	"github.com/senonerk/sup/srv/auth/handler"
+	"github.com/senonerk/sup/srv/auth/models"
 	proto "github.com/senonerk/sup/srv/auth/proto"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
 	service := micro.NewService(
 		micro.Name("senonerk.sup.srv.auth"),
 		micro.Version("0.0.1"),
+		micro.RegisterTTL(time.Second*40),
+		micro.RegisterInterval(time.Second*20),
 	)
+
+	// Connect to Database
+	cnn, err := db.Connect()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Register models in ODM
+	cnn.Register(&models.User{}, "users")
+
+	//--- SEED DB ---//
+	// m := cnn.Model("User")
+	// usr := &models.User{
+	// 	UserName: "test",
+	// 	Password: "fo",
+	// 	Permissions: []models.Permission{
+	// 		models.Permission{
+	// 			Tag:   "ALL",
+	// 			Grant: true,
+	// 		},
+	// 	},
+	// }
+	// m.New(usr)
+	// usr.Save()
 
 	service.Init()
 

@@ -8,6 +8,7 @@ It is generated from these files:
 	auth.proto
 
 It has these top-level messages:
+	CheckPasswordRequest
 	VerifyTokenRequest
 	VerifyTokenResponse
 	UserRequest
@@ -54,6 +55,7 @@ type AuthService interface {
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...client.CallOption) (*Response, error)
 	SetPermission(ctx context.Context, in *SetPermissionRequest, opts ...client.CallOption) (*Response, error)
 	VerifyToken(ctx context.Context, in *VerifyTokenRequest, opts ...client.CallOption) (*VerifyTokenResponse, error)
+	CheckPassword(ctx context.Context, in *CheckPasswordRequest, opts ...client.CallOption) (*Response, error)
 }
 
 type authService struct {
@@ -134,6 +136,16 @@ func (c *authService) VerifyToken(ctx context.Context, in *VerifyTokenRequest, o
 	return out, nil
 }
 
+func (c *authService) CheckPassword(ctx context.Context, in *CheckPasswordRequest, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "Auth.CheckPassword", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Auth service
 
 type AuthHandler interface {
@@ -143,6 +155,7 @@ type AuthHandler interface {
 	ChangePassword(context.Context, *ChangePasswordRequest, *Response) error
 	SetPermission(context.Context, *SetPermissionRequest, *Response) error
 	VerifyToken(context.Context, *VerifyTokenRequest, *VerifyTokenResponse) error
+	CheckPassword(context.Context, *CheckPasswordRequest, *Response) error
 }
 
 func RegisterAuthHandler(s server.Server, hdlr AuthHandler, opts ...server.HandlerOption) error {
@@ -153,6 +166,7 @@ func RegisterAuthHandler(s server.Server, hdlr AuthHandler, opts ...server.Handl
 		ChangePassword(ctx context.Context, in *ChangePasswordRequest, out *Response) error
 		SetPermission(ctx context.Context, in *SetPermissionRequest, out *Response) error
 		VerifyToken(ctx context.Context, in *VerifyTokenRequest, out *VerifyTokenResponse) error
+		CheckPassword(ctx context.Context, in *CheckPasswordRequest, out *Response) error
 	}
 	type Auth struct {
 		auth
@@ -187,4 +201,8 @@ func (h *authHandler) SetPermission(ctx context.Context, in *SetPermissionReques
 
 func (h *authHandler) VerifyToken(ctx context.Context, in *VerifyTokenRequest, out *VerifyTokenResponse) error {
 	return h.AuthHandler.VerifyToken(ctx, in, out)
+}
+
+func (h *authHandler) CheckPassword(ctx context.Context, in *CheckPasswordRequest, out *Response) error {
+	return h.AuthHandler.CheckPassword(ctx, in, out)
 }

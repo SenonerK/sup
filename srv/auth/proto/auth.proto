@@ -9,6 +9,12 @@ service auth {
     rpc ChangePassword(ChangePasswordRequest) returns (Response) {}
     rpc SetPermission(SetPermissionRequest) returns (Response) {}
     rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {}
+    rpc CheckPassword (CheckPasswordRequest) returns (Response) {}
+}
+
+message CheckPasswordRequest {
+    string userID = 1;
+    string password = 2;
 }
 
 message VerifyTokenRequest {

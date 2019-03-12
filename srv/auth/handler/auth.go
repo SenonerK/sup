@@ -47,3 +47,7 @@ func (a *authService) VerifyToken(ctx context.Context, req *proto.VerifyTokenReq
 	}
 	return errors.New("test")
 }
+
+func (a *authService) CheckPassword(ctx context.Context, req *proto.CheckPasswordRequest, res *proto.Response) error {
+	return nil
+}

@@ -1,27 +1,36 @@
-consul:
-  command: -server -bootstrap -rejoin 
-  image: progrium/consul:latest
-  ports:
-    - "8300:8300"
-    - "8400:8400"
-    - "8500:8500"
-    - "8600:53/udp"
-micro:
-  command: --registry_address=consul:8500 api --handler=http --namespace senonerk.sup.api
-  image: microhq/micro:latest
-  links:
-    - consul
-    - auth_api
-  ports:
-    - "8080:8080"
-auth_api:
-  build: ./api/auth
-  command: --registry_address=consul:8500
-  links:
-    - consul
-    - auth
-auth:
-  build: ./srv/auth
-  command: --registry_address=consul:8500
-  links:
-    - consul
+version: "3.2"
+services:
+  consul:
+    command: -server -bootstrap -rejoin 
+    image: progrium/consul:latest
+  micro:
+    command: --registry=consul --registry_address=consul:8500 api --handler=http --namespace senonerk.sup.api
+    image: microhq/micro:latest
+    links:
+      - consul
+      - auth_api
+    ports:
+      - "8080:8080"
+  auth_api:
+    build: ./api/auth
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - auth_srv
+  auth_srv:
+    build: ./srv/auth
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - authdb
+  authdb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    volumes:
+      - "authdb:/data/db"
+volumes:
+  authdb:
