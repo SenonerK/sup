@@ -5,9 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/senonerk/sup/shared/http/util"
+	"github.com/senonerk/sup/shared/aerr"
 )
 
+// ErrorReporter catches http errors and composes a json response
 func ErrorReporter() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
@@ -16,12 +17,12 @@ func ErrorReporter() gin.HandlerFunc {
 
 		if len(detectedErrors) > 0 {
 			err := detectedErrors[0].Err
-			var parsedError *util.AppError
+			var parsedError *aerr.AppError
 			switch err.(type) {
-			case *util.AppError:
-				parsedError = err.(*util.AppError)
+			case *aerr.AppError:
+				parsedError = err.(*aerr.AppError)
 			default:
-				parsedError = &util.AppError{
+				parsedError = &aerr.AppError{
 					Code:    http.StatusInternalServerError,
 					Message: "Internal Server Error",
 				}

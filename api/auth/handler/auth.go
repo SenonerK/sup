@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/senonerk/sup/api/auth/forms"
+	"github.com/senonerk/sup/shared/aerr"
 
 	"github.com/senonerk/sup/shared/http/util"
 
@@ -16,6 +17,8 @@ import (
 type authApi struct {
 	Client auth.AuthService
 }
+
+const FQDN = "senonerk.sup.api.auth"
 
 // New retuens new handeler for auth
 func New() *gin.Engine {
@@ -75,7 +78,7 @@ func (api *authApi) Register(c *gin.Context) {
 
 	_, err := api.Client.Register(ctx, &req)
 	if err != nil {
-		c.Error(err)
+		c.Error(aerr.FromErr(err))
 		return
 	}
 
@@ -98,9 +101,10 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	}
 
 	if req.OldPassword == req.NewPassword {
-		c.Error(&util.AppError{
+		c.Error(&aerr.AppError{
 			Code:    409,
 			Message: "Password cannot be the same",
+			Source:  FQDN,
 		})
 		return
 	}
@@ -111,10 +115,7 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(&util.AppError{
-			Code:    403,
-			Message: "Wrong password",
-		})
+		c.Error(err)
 		return
 	}
 
