@@ -18,7 +18,10 @@ type authApi struct {
 	Client auth.AuthService
 }
 
-const FQDN = "senonerk.sup.api.auth"
+const (
+	FQDN      = "senonerk.sup.api.auth"
+	userIDKey = "userID"
+)
 
 // New retuens new handeler for auth
 func New() *gin.Engine {
@@ -34,6 +37,7 @@ func New() *gin.Engine {
 	a.POST("/login", srv.Login)
 	a.POST("/register", srv.Register)
 	a.PUT("/password", middlewares.AuthenticatedRoute(), srv.ChangePassword)
+	a.GET("/token", middlewares.AuthenticatedRoute(), srv.NewToken)
 
 	return router
 }
@@ -94,6 +98,24 @@ func (api *authApi) Register(c *gin.Context) {
 	util.Ok(c, nil)
 }
 
+func (api *authApi) NewToken(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	res, err := api.Client.NewToken(ctx, &auth.NewTokenRequest{
+		UserID:         c.GetString(userIDKey),
+		ExpiresInHours: 48,
+	})
+
+	if err != nil {
+		c.Error(aerr.FromErr(err))
+		return
+	}
+
+	util.Ok(c, gin.H{
+		"token": res.Token,
+	})
+}
+
 func (api *authApi) ChangePassword(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -128,7 +150,7 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	}
 
 	_, err := api.Client.CheckPassword(ctx, &auth.CheckPasswordRequest{
-		UserID:   c.GetString("userID"),
+		UserID:   c.GetString(userIDKey),
 		Password: req.OldPassword,
 	})
 
@@ -138,7 +160,7 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	}
 
 	_, err = api.Client.ChangePassword(ctx, &auth.ChangePasswordRequest{
-		UserID:      c.GetString("userID"),
+		UserID:      c.GetString(userIDKey),
 		NewPassword: req.NewPassword,
 	})
 

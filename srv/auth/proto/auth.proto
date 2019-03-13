@@ -10,6 +10,12 @@ service auth {
     rpc SetPermission(SetPermissionRequest) returns (Response) {}
     rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {}
     rpc CheckPassword (CheckPasswordRequest) returns (Response) {}
+    rpc NewToken (NewTokenRequest) returns (LoginResponse) {}
+}
+
+message NewTokenRequest {
+    string userID = 1;
+    int32 expiresInHours = 2;
 }
 
 message CheckPasswordRequest {

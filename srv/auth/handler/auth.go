@@ -47,7 +47,9 @@ func (a *authService) Login(ctx context.Context, req *proto.UserRequest, res *pr
 		return err
 	}
 
-	token, err := jwt.GenerateToken(user.Id.Hex(), time.Minute*30)
+	duration := time.Hour * 24 * 2
+
+	token, err := jwt.GenerateToken(user.Id.Hex(), duration)
 	if err != nil {
 		return err
 	}
@@ -163,6 +165,23 @@ func (a *authService) CheckPassword(ctx context.Context, req *proto.CheckPasswor
 	if err := salter.CompareHMAC(req.Password, user.Password); err != nil {
 		return errors.New("Wrong password")
 	}
+
+	return nil
+}
+
+func (a *authService) NewToken(ctx context.Context, req *proto.NewTokenRequest, res *proto.LoginResponse) error {
+	// Make db call to ensure that user still exists
+	_, err := getUserByID(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	token, err := jwt.GenerateToken(req.UserID, time.Hour*time.Duration(req.ExpiresInHours))
+	if err != nil {
+		return err
+	}
+
+	res.Token = token
 
 	return nil
 }

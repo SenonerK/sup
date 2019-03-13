@@ -8,6 +8,7 @@ It is generated from these files:
 	auth.proto
 
 It has these top-level messages:
+	NewTokenRequest
 	CheckPasswordRequest
 	VerifyTokenRequest
 	VerifyTokenResponse
@@ -56,6 +57,7 @@ type AuthService interface {
 	SetPermission(ctx context.Context, in *SetPermissionRequest, opts ...client.CallOption) (*Response, error)
 	VerifyToken(ctx context.Context, in *VerifyTokenRequest, opts ...client.CallOption) (*VerifyTokenResponse, error)
 	CheckPassword(ctx context.Context, in *CheckPasswordRequest, opts ...client.CallOption) (*Response, error)
+	NewToken(ctx context.Context, in *NewTokenRequest, opts ...client.CallOption) (*LoginResponse, error)
 }
 
 type authService struct {
@@ -146,6 +148,16 @@ func (c *authService) CheckPassword(ctx context.Context, in *CheckPasswordReques
 	return out, nil
 }
 
+func (c *authService) NewToken(ctx context.Context, in *NewTokenRequest, opts ...client.CallOption) (*LoginResponse, error) {
+	req := c.c.NewRequest(c.name, "Auth.NewToken", in)
+	out := new(LoginResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Auth service
 
 type AuthHandler interface {
@@ -156,6 +168,7 @@ type AuthHandler interface {
 	SetPermission(context.Context, *SetPermissionRequest, *Response) error
 	VerifyToken(context.Context, *VerifyTokenRequest, *VerifyTokenResponse) error
 	CheckPassword(context.Context, *CheckPasswordRequest, *Response) error
+	NewToken(context.Context, *NewTokenRequest, *LoginResponse) error
 }
 
 func RegisterAuthHandler(s server.Server, hdlr AuthHandler, opts ...server.HandlerOption) error {
@@ -167,6 +180,7 @@ func RegisterAuthHandler(s server.Server, hdlr AuthHandler, opts ...server.Handl
 		SetPermission(ctx context.Context, in *SetPermissionRequest, out *Response) error
 		VerifyToken(ctx context.Context, in *VerifyTokenRequest, out *VerifyTokenResponse) error
 		CheckPassword(ctx context.Context, in *CheckPasswordRequest, out *Response) error
+		NewToken(ctx context.Context, in *NewTokenRequest, out *LoginResponse) error
 	}
 	type Auth struct {
 		auth
@@ -205,4 +219,8 @@ func (h *authHandler) VerifyToken(ctx context.Context, in *VerifyTokenRequest, o
 
 func (h *authHandler) CheckPassword(ctx context.Context, in *CheckPasswordRequest, out *Response) error {
 	return h.AuthHandler.CheckPassword(ctx, in, out)
+}
+
+func (h *authHandler) NewToken(ctx context.Context, in *NewTokenRequest, out *LoginResponse) error {
+	return h.AuthHandler.NewToken(ctx, in, out)
 }
