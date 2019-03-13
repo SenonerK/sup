@@ -1,3 +1,3 @@
 FROM scratch
-ADD auth /auth
+ADD auth.bin /auth
 ENTRYPOINT [ "/auth" ]
