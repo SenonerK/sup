@@ -76,6 +76,15 @@ func (api *authApi) Register(c *gin.Context) {
 		return
 	}
 
+	if len(req.Password) < 8 {
+		c.Error(&aerr.AppError{
+			Code:    400,
+			Message: "Password must be at least 8 characters long",
+			Source:  FQDN,
+		})
+		return
+	}
+
 	_, err := api.Client.Register(ctx, &req)
 	if err != nil {
 		c.Error(aerr.FromErr(err))
@@ -104,6 +113,15 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 		c.Error(&aerr.AppError{
 			Code:    409,
 			Message: "Password cannot be the same",
+			Source:  FQDN,
+		})
+		return
+	}
+
+	if len(req.NewPassword) < 8 {
+		c.Error(&aerr.AppError{
+			Code:    400,
+			Message: "Password must be at least 8 characters long",
 			Source:  FQDN,
 		})
 		return

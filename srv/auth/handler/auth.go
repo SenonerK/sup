@@ -123,13 +123,22 @@ func (a *authService) VerifyToken(ctx context.Context, req *proto.VerifyTokenReq
 }
 
 func (a *authService) CheckPassword(ctx context.Context, req *proto.CheckPasswordRequest, res *proto.Response) error {
+	user, err := getUserByID(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	if err := salter.CompareHMAC(req.Password, user.Password); err != nil {
+		return errors.New("Wrong password")
+	}
+
 	return nil
 }
 
 func getUserByID(userID string) (*models.User, error) {
 	var user models.User
 	err := db.D().FindOne(bson.M{
-		"_id":     userID,
+		"_id":     bson.ObjectIdHex(userID),
 		"deleted": false,
 	}).Exec(&user)
 	return &user, err
