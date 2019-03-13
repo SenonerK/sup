@@ -112,11 +112,14 @@ func (a *authService) SetPermission(ctx context.Context, req *proto.SetPermissio
 }
 
 func (a *authService) VerifyToken(ctx context.Context, req *proto.VerifyTokenRequest, res *proto.VerifyTokenResponse) error {
-	if req.Token == "VALID_TOKEN" {
-		res.UserID = "123"
-		return nil
+	userid, err := jwt.ValidateToken(req.Token)
+	if err != nil {
+		return err
 	}
-	return errors.New("test")
+
+	res.UserID = userid
+
+	return nil
 }
 
 func (a *authService) CheckPassword(ctx context.Context, req *proto.CheckPasswordRequest, res *proto.Response) error {

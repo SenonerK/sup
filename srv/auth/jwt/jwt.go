@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/senonerk/sup/shared/aerr"
 )
 
 // UserClaims contains userid
@@ -50,13 +49,9 @@ func ValidateToken(tokenString string) (string, error) {
 		return "", err
 	}
 
-	claims, ok := token.Claims.(UserClaims)
+	claims, ok := token.Claims.(*UserClaims)
 	if !ok || !token.Valid {
-		return "", &aerr.AppError{
-			Code:    400,
-			Message: "Invalid authentication token",
-			Source:  "senonerk.sup.srv.auth.jwt",
-		}
+		return "", errors.New("Invalid authentication token")
 	}
 
 	return claims.UserID, nil
