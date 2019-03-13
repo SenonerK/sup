@@ -3,8 +3,6 @@ package main
 import (
 	"time"
 
-	"github.com/joho/godotenv"
-
 	"github.com/senonerk/sup/srv/auth/db"
 
 	"github.com/micro/go-log"
@@ -16,12 +14,6 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
 	service := micro.NewService(
 		micro.Name("senonerk.sup.srv.auth"),
 		micro.Version("0.0.1"),
@@ -31,6 +23,7 @@ func main() {
 
 	// Connect to Database
 	cnn, err := db.Connect()
+	defer db.Close()
 	if err != nil {
 		log.Fatal(err)
 		return
