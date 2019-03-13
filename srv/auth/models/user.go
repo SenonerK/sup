@@ -17,3 +17,14 @@ type Permission struct {
 	Tag   string `json:"tag" bson:"tag"`
 	Grant bool   `json:"grant" bson:"grant"`
 }
+
+// GetPermission finds permission
+func (u *User) GetPermission(tag string) (Permission, bool) {
+	for _, p := range u.Permissions {
+		if p.Tag == tag {
+			return p, true
+		}
+	}
+
+	return Permission{}, false
+}

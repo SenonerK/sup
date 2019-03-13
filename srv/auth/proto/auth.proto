@@ -38,7 +38,7 @@ message LoginResponse {
 }
 
 message CheckPermissionsRequest {
-    string token = 1;
+    string userID = 1;
     repeated string permissionTags = 2;
 }
 

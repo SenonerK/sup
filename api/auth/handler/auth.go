@@ -54,7 +54,7 @@ func (api *authApi) Login(c *gin.Context) {
 
 	res, err := api.Client.Login(ctx, &req)
 	if err != nil {
-		c.Error(err)
+		c.Error(aerr.FromErr(err))
 		return
 	}
 
@@ -115,7 +115,7 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(err)
+		c.Error(aerr.FromErr(err))
 		return
 	}
 
@@ -125,7 +125,7 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(err)
+		c.Error(aerr.FromErr(err))
 		return
 	}
 

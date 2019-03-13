@@ -7,8 +7,6 @@ import (
 	"errors"
 	"hash"
 	"os"
-
-	"github.com/senonerk/sup/shared/aerr"
 )
 
 var hmc hash.Hash
@@ -40,11 +38,7 @@ func CompareHMAC(password, hmacString string) error {
 	}
 
 	if !hmac.Equal([]byte(hash), []byte(hmacString)) {
-		return &aerr.AppError{
-			Code:    400,
-			Message: "Incorrect password",
-			Source:  "senonerk.sup.srv.auth.salter",
-		}
+		return errors.New("Incorrect password")
 	}
 
 	return nil

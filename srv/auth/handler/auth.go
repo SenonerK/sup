@@ -3,6 +3,9 @@ package handler
 import (
 	"context"
 	"errors"
+	"time"
+
+	"github.com/senonerk/sup/srv/auth/jwt"
 
 	"github.com/zebresel-com/mongodm"
 
@@ -27,15 +30,34 @@ func New() *authService {
 }
 
 func (a *authService) Login(ctx context.Context, req *proto.UserRequest, res *proto.LoginResponse) error {
-	res.Token = "Fake"
+	user, err := getUser(req.Username)
+
+	exerr := errors.New("Username/Password is incorrect")
+	if _, ok := err.(*mongodm.NotFoundError); ok {
+		return exerr
+	} else if err != nil {
+		return err
+	}
+
+	if err := salter.CompareHMAC(req.Password, user.Password); err != nil {
+		return exerr
+	}
+
+	if err := checkPermissions(user, []string{"LOGIN"}); err != nil {
+		return err
+	}
+
+	token, err := jwt.GenerateToken(user.Id.Hex(), time.Minute*30)
+	if err != nil {
+		return err
+	}
+
+	res.Token = token
 	return nil
 }
 
 func (a *authService) Register(ctx context.Context, req *proto.UserRequest, res *proto.Response) error {
-	err := db.D().FindOne(bson.M{
-		"username": req.Username,
-		"deleted":  false,
-	}).Exec(&models.User{})
+	_, err := getUser(req.Username)
 
 	if err != nil {
 		if _, ok := err.(*mongodm.NotFoundError); !ok {
@@ -73,7 +95,12 @@ func (a *authService) Register(ctx context.Context, req *proto.UserRequest, res 
 }
 
 func (a *authService) CheckPermissions(ctx context.Context, req *proto.CheckPermissionsRequest, res *proto.Response) error {
-	return nil
+	user, err := getUserByID(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	return checkPermissions(user, req.PermissionTags)
 }
 
 func (a *authService) ChangePassword(ctx context.Context, req *proto.ChangePasswordRequest, res *proto.Response) error {
@@ -93,5 +120,32 @@ func (a *authService) VerifyToken(ctx context.Context, req *proto.VerifyTokenReq
 }
 
 func (a *authService) CheckPassword(ctx context.Context, req *proto.CheckPasswordRequest, res *proto.Response) error {
+	return nil
+}
+
+func getUserByID(userID string) (*models.User, error) {
+	var user models.User
+	err := db.D().FindOne(bson.M{
+		"_id":     userID,
+		"deleted": false,
+	}).Exec(&user)
+	return &user, err
+}
+
+func getUser(username string) (*models.User, error) {
+	var user models.User
+	err := db.D().FindOne(bson.M{
+		"username": username,
+		"deleted":  false,
+	}).Exec(&user)
+	return &user, err
+}
+
+func checkPermissions(user *models.User, permissions []string) error {
+	for _, p := range permissions {
+		if pr, ok := user.GetPermission(p); !ok || !pr.Grant {
+			return errors.New("Unauthorized")
+		}
+	}
 	return nil
 }
