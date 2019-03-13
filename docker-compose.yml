@@ -23,6 +23,13 @@ services:
     links:
       - consul
       - authdb
+    environment:
+      DB_HOST: authdb
+      DB_NAME: auth
+      DB_USER: root
+      DB_PASSWORD: secret
+      JWT_SECRET: supersecret
+      PASSWORD_HMAC_SECRET: ultrasecret
   authdb:
     image: mongo
     ports:
