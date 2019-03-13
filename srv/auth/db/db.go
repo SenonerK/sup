@@ -11,8 +11,13 @@ import (
 var connection *mongodm.Connection
 
 // D returns pointer to db connection
-func D() *mongodm.Connection {
-	return connection
+func D() *mongodm.Model {
+	return connection.Model("User")
+}
+
+// Close close ODM
+func Close() {
+	connection.Close()
 }
 
 // Connect creates connection
