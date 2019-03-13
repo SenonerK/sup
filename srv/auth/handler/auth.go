@@ -72,6 +72,7 @@ func (a *authService) Register(ctx context.Context, req *proto.UserRequest, res 
 		return err
 	}
 
+	// Create user and add standard permission to allow login to the system
 	user := &models.User{
 		UserName: req.Username,
 		Password: salt,
@@ -104,7 +105,18 @@ func (a *authService) CheckPermissions(ctx context.Context, req *proto.CheckPerm
 }
 
 func (a *authService) ChangePassword(ctx context.Context, req *proto.ChangePasswordRequest, res *proto.Response) error {
-	return nil
+	user, err := getUserByID(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	pass, err := salter.GenerateHMAC(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	user.Password = pass
+	return user.Save()
 }
 
 func (a *authService) SetPermission(ctx context.Context, req *proto.SetPermissionRequest, res *proto.Response) error {
