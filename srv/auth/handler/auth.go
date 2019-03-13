@@ -108,7 +108,27 @@ func (a *authService) ChangePassword(ctx context.Context, req *proto.ChangePassw
 }
 
 func (a *authService) SetPermission(ctx context.Context, req *proto.SetPermissionRequest, res *proto.Response) error {
-	return nil
+	user, err := getUserByID(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	var found bool
+	for i, p := range user.Permissions {
+		if p.Tag == req.PermissionTag {
+			user.Permissions[i].Grant = req.Grant
+			found = true
+		}
+	}
+
+	if !found {
+		user.Permissions = append(user.Permissions, models.Permission{
+			Tag:   req.PermissionTag,
+			Grant: req.Grant,
+		})
+	}
+
+	return user.Save()
 }
 
 func (a *authService) VerifyToken(ctx context.Context, req *proto.VerifyTokenRequest, res *proto.VerifyTokenResponse) error {
