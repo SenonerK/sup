@@ -17,7 +17,9 @@ func D() *mongodm.Model {
 
 // Close close ODM
 func Close() {
-	connection.Close()
+	if connection != nil {
+		connection.Close()
+	}
 }
 
 // Connect creates connection
