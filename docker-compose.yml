@@ -39,13 +39,29 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
       - "authdb:/data/db"
+  profile_srv:
+    build: ./srv/profile
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - profiledb
+    environment:
+      DB_URI: "host=profiledb port=5432 dbname=profile user=postgres sslmode=disable"
+  profiledb:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - "profiledb:/var/lib/postgresql/data"
   explorer:
     command: --registry=consul --registry_address=consul:8500 web
     image: microhq/micro:latest
     links:
       - consul
       - auth_srv
+      - profile_srv
     ports:
       - "8082:8082"
 volumes:
   authdb:
+  profiledb:
