@@ -34,7 +34,7 @@ func AuthenticatedRoute() gin.HandlerFunc {
 					return
 				}
 
-				c.Set("userID", res.UserID)
+				c.Set(util.UserIDKey, res.UserID)
 				c.Next()
 				return
 			}

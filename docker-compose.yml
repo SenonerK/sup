@@ -9,6 +9,7 @@ services:
     links:
       - consul
       - auth_api
+      - profile_api
     ports:
       - "8080:8080"
   auth_api:
@@ -39,6 +40,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
       - "authdb:/data/db"
+  profile_api:
+    build: ./api/profile
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - profile_srv
   profile_srv:
     build: ./srv/profile
     command: --registry=consul --registry_address=consul:8500

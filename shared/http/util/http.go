@@ -5,6 +5,8 @@ import (
 	"github.com/senonerk/sup/shared/aerr"
 )
 
+const UserIDKey = "userID"
+
 // ErrInavlidForm if error
 func ErrInavlidForm() *aerr.AppError {
 	return &aerr.AppError{
