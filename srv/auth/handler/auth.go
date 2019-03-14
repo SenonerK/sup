@@ -5,6 +5,12 @@ import (
 	"errors"
 	"time"
 
+	"github.com/satori/go.uuid"
+	"github.com/senonerk/sup/srv/auth/proto/events"
+
+	"github.com/micro/go-log"
+	"github.com/micro/go-micro"
+
 	"github.com/senonerk/sup/srv/auth/jwt"
 
 	"github.com/zebresel-com/mongodm"
@@ -22,11 +28,15 @@ const (
 	FQDN = "senonerk.sup.srv.auth"
 )
 
-type authService struct{}
+type authService struct {
+	NewUserPub micro.Publisher
+}
 
 // New returns a service implementation
-func New() *authService {
-	return new(authService)
+func New(newUserPub micro.Publisher) *authService {
+	return &authService{
+		NewUserPub: newUserPub,
+	}
 }
 
 func (a *authService) Login(ctx context.Context, req *proto.UserRequest, res *proto.LoginResponse) error {
@@ -91,6 +101,19 @@ func (a *authService) Register(ctx context.Context, req *proto.UserRequest, res 
 	}
 
 	if err = user.Save(); err != nil {
+		return err
+	}
+
+	err = a.NewUserPub.Publish(ctx, &event.NewUserEvent{
+		Id:        uuid.NewV4().String(),
+		Timestamp: time.Now().Unix(),
+		UserID:    user.Id.Hex(),
+	})
+
+	if err != nil {
+		if err = user.Delete(); err != nil {
+			log.Fatalf("User created, pub and emergency delete failed. UserID: %s", user.Id.Hex())
+		}
 		return err
 	}
 

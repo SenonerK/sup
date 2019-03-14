@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+service profile {
+    rpc UpdateInfo(UpdateInfoRequest) returns (Response);
+    rpc UpdateStatus(UpdateStatusRequest) returns (Response);
+    rpc UpdateEmail(UpdateEmailRequest) returns (Response);
+    rpc ConfirmEmail(ConfirmEmailRequest) returns (Response);
+}
+
+message UpdateStatusRequest {
+    string userID = 1;
+    string newStatus = 2;
+}
+
+message UpdateEmailRequest {
+    string userID = 1;
+    string newEmail = 2;
+}
+
+message ConfirmEmailRequest {
+    string userID = 1;
+    string emailToken = 2;
+}
+
+message UpdateInfoRequest {
+    string userID = 1;
+    string FirstName = 2;
+    string LastName = 3;
+    int64 Birth = 4;
+}
+
+message Response {
+}

@@ -21,6 +21,8 @@ func main() {
 		micro.RegisterInterval(time.Second*20),
 	)
 
+	NewUserPub := micro.NewPublisher("sup.auth.NewUser", service.Client())
+
 	// Connect to Database
 	cnn, err := db.Connect()
 	defer db.Close()
@@ -49,7 +51,7 @@ func main() {
 
 	service.Init()
 
-	proto.RegisterAuthHandler(service.Server(), handler.New())
+	proto.RegisterAuthHandler(service.Server(), handler.New(NewUserPub))
 
 	if err := service.Run(); err != nil {
 		log.Fatal(err)
