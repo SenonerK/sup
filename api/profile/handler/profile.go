@@ -15,11 +15,12 @@ import (
 	"github.com/micro/go-micro/client"
 )
 
-// profileApi struct
-type profileApi struct {
+// profileAPI struct
+type profileAPI struct {
 	Client profile.ProfileService
 }
 
+// FQDN this apis unique identifier
 const FQDN = "senonerk.sup.api.profile"
 
 var emailRegex *regexp.Regexp
@@ -35,7 +36,7 @@ func New() *gin.Engine {
 	router.Use(middlewares.ErrorReporter())
 	router.Use(middlewares.AuthenticatedRoute())
 
-	srv := profileApi{
+	srv := profileAPI{
 		Client: profile.NewProfileService("senonerk.sup.srv.profile", client.DefaultClient),
 	}
 
@@ -49,7 +50,7 @@ func New() *gin.Engine {
 	return router
 }
 
-func (api *profileApi) UpdateInfo(c *gin.Context) {
+func (api *profileAPI) UpdateInfo(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	var req forms.UpdateInfo
@@ -78,7 +79,7 @@ func (api *profileApi) UpdateInfo(c *gin.Context) {
 	util.Ok(c, nil)
 }
 
-func (api *profileApi) UpdateStatus(c *gin.Context) {
+func (api *profileAPI) UpdateStatus(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	var req forms.UpdateStatus
@@ -105,7 +106,7 @@ func (api *profileApi) UpdateStatus(c *gin.Context) {
 	util.Ok(c, nil)
 }
 
-func (api *profileApi) UpdateEmail(c *gin.Context) {
+func (api *profileAPI) UpdateEmail(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	var req forms.UpdateEmail
@@ -136,7 +137,7 @@ func (api *profileApi) UpdateEmail(c *gin.Context) {
 	util.Ok(c, nil)
 }
 
-func (api *profileApi) ConfirmEmail(c *gin.Context) {
+func (api *profileAPI) ConfirmEmail(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	var req forms.ConfirmEmail
@@ -163,7 +164,7 @@ func (api *profileApi) ConfirmEmail(c *gin.Context) {
 	util.Ok(c, nil)
 }
 
-func (api *profileApi) GetInfo(c *gin.Context) {
+func (api *profileAPI) GetInfo(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	res, err := api.Client.GetInfo(ctx, &profile.GetInfoRequest{
