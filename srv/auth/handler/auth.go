@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/senonerk/sup/shared/tags"
+
 	"github.com/satori/go.uuid"
 	"github.com/senonerk/sup/srv/auth/proto/events"
 
@@ -53,7 +55,7 @@ func (a *authService) Login(ctx context.Context, req *proto.UserRequest, res *pr
 		return exerr
 	}
 
-	if err := checkPermissions(user, []string{"LOGIN"}); err != nil {
+	if err := checkPermissions(user, []string{tags.PERMISSION_LOGIN}); err != nil {
 		return err
 	}
 
@@ -90,7 +92,7 @@ func (a *authService) Register(ctx context.Context, req *proto.UserRequest, res 
 		Password: salt,
 		Permissions: []models.Permission{
 			models.Permission{
-				Tag:   "LOGIN",
+				Tag:   tags.PERMISSION_LOGIN,
 				Grant: true,
 			},
 		},

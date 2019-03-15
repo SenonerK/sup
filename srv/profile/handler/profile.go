@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/senonerk/sup/shared/tags"
+
 	"github.com/senonerk/sup/srv/auth/proto"
 
 	"github.com/m1ome/randstr"
@@ -19,8 +21,6 @@ import (
 type ProfileService struct {
 	Auth auth.AuthService
 }
-
-const emailPermissionTag = "EMAIL_VERIFIED"
 
 // UpdateInfo updates First,Last -Name and Birthdate
 func (ProfileService) UpdateInfo(ctx context.Context, req *proto.UpdateInfoRequest, res *proto.Response) error {
@@ -65,7 +65,7 @@ func (s *ProfileService) UpdateEmail(ctx context.Context, req *proto.UpdateEmail
 
 	_, err = s.Auth.SetPermission(ctx, &auth.SetPermissionRequest{
 		UserID:        req.UserID,
-		PermissionTag: emailPermissionTag,
+		PermissionTag: tags.PERMISSION_EMAIL,
 		Grant:         false,
 	})
 
@@ -97,7 +97,7 @@ func (s *ProfileService) ConfirmEmail(ctx context.Context, req *proto.ConfirmEma
 
 	_, err = s.Auth.SetPermission(ctx, &auth.SetPermissionRequest{
 		UserID:        req.UserID,
-		PermissionTag: emailPermissionTag,
+		PermissionTag: tags.PERMISSION_EMAIL,
 		Grant:         true,
 	})
 

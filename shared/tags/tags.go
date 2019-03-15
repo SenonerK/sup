@@ -1,0 +1,6 @@
+package tags
+
+const (
+	PERMISSION_LOGIN = "LOGIN"
+	PERMISSION_EMAIL = "EMAIL_VERIFIED"
+)
