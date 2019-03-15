@@ -10,6 +10,6 @@ type Profile struct {
 	BirthDate         time.Time
 	Status            string `gorm:"type:varchar(100)"`
 	Email             string `gorm:"type:varchar(100);unique_index"`
-	EmailToken        string `gorm:"type:char(60)"`
+	EmailToken        string `gorm:"type:varchar"`
 	EmailTokenExpires time.Time
 }

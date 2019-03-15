@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/senonerk/sup/srv/auth/proto"
+
 	"github.com/senonerk/sup/srv/profile/models"
 
 	"github.com/senonerk/sup/srv/profile/db"
@@ -33,7 +35,9 @@ func main() {
 
 	service.Init()
 
-	profile.RegisterProfileHandler(service.Server(), new(handler.ProfileService))
+	profile.RegisterProfileHandler(service.Server(), &handler.ProfileService{
+		Auth: auth.NewAuthService("senonerk.sup.srv.auth", service.Client()),
+	})
 
 	micro.RegisterSubscriber("sup.auth.NewUser", service.Server(), new(handler.NewUserSubscriber))
 
