@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"regexp"
+
 	"github.com/senonerk/sup/api/profile/forms"
 	"github.com/senonerk/sup/shared/aerr"
 	"github.com/senonerk/sup/shared/http/util"
@@ -19,19 +21,28 @@ type profileApi struct {
 
 const FQDN = "senonerk.sup.api.profile"
 
+var emailRegex *regexp.Regexp
+
+func init() {
+	emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+}
+
 // New retuens new handler for auth
 func New() *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middlewares.ErrorReporter())
+	router.Use(middlewares.AuthenticatedRoute())
 
 	srv := profileApi{
 		Client: profile.NewProfileService("senonerk.sup.srv.profile", client.DefaultClient),
 	}
 
 	a := router.Group("/profile")
-	a.PUT("/", middlewares.AuthenticatedRoute(), srv.UpdateInfo)
-	a.POST("/status", middlewares.AuthenticatedRoute(), srv.UpdateStatus)
+	a.PUT("/", srv.UpdateInfo)
+	a.POST("/status", srv.UpdateStatus)
+	a.PUT("/email", srv.UpdateEmail)
+	a.POST("/email", srv.ConfirmEmail)
 
 	return router
 }
@@ -82,6 +93,64 @@ func (api *profileApi) UpdateStatus(c *gin.Context) {
 	_, err := api.Client.UpdateStatus(ctx, &profile.UpdateStatusRequest{
 		UserID:    c.GetString(util.UserIDKey),
 		NewStatus: req.NewStatus,
+	})
+
+	if err != nil {
+		c.Error(aerr.FromErr(err))
+		return
+	}
+
+	util.Ok(c, nil)
+}
+
+func (api *profileApi) UpdateEmail(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	var req forms.UpdateEmail
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(util.ErrInavlidForm())
+		return
+	}
+
+	if !emailRegex.MatchString(req.NewEmail) {
+		c.Error(&aerr.AppError{
+			Code:    400,
+			Message: "Invalid email",
+			Source:  FQDN,
+		})
+		return
+	}
+
+	_, err := api.Client.UpdateEmail(ctx, &profile.UpdateEmailRequest{
+		UserID:   c.GetString(util.UserIDKey),
+		NewEmail: req.NewEmail,
+	})
+
+	if err != nil {
+		c.Error(aerr.FromErr(err))
+		return
+	}
+
+	util.Ok(c, nil)
+}
+
+func (api *profileApi) ConfirmEmail(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	var req forms.ConfirmEmail
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(util.ErrInavlidForm())
+		return
+	}
+
+	if req.Token == "" {
+		c.Error(util.ErrBadRequest())
+		return
+	}
+
+	_, err := api.Client.ConfirmEmail(ctx, &profile.ConfirmEmailRequest{
+		UserID:     c.GetString(util.UserIDKey),
+		EmailToken: req.Token,
 	})
 
 	if err != nil {
