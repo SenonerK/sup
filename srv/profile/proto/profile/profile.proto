@@ -5,6 +5,19 @@ service profile {
     rpc UpdateStatus(UpdateStatusRequest) returns (Response);
     rpc UpdateEmail(UpdateEmailRequest) returns (Response);
     rpc ConfirmEmail(ConfirmEmailRequest) returns (Response);
+    rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+}
+
+message GetInfoRequest {
+    string userID = 1;
+}
+
+message GetInfoResponse {
+    string FirstName = 2;
+    string LastName = 3;
+    int64 Birth = 4;
+    string Status = 5;
+    string Email = 6;
 }
 
 message UpdateStatusRequest {

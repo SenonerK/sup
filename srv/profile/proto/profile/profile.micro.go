@@ -8,6 +8,8 @@ It is generated from these files:
 	profile.proto
 
 It has these top-level messages:
+	GetInfoRequest
+	GetInfoResponse
 	UpdateStatusRequest
 	UpdateEmailRequest
 	ConfirmEmailRequest
@@ -49,6 +51,7 @@ type ProfileService interface {
 	UpdateStatus(ctx context.Context, in *UpdateStatusRequest, opts ...client.CallOption) (*Response, error)
 	UpdateEmail(ctx context.Context, in *UpdateEmailRequest, opts ...client.CallOption) (*Response, error)
 	ConfirmEmail(ctx context.Context, in *ConfirmEmailRequest, opts ...client.CallOption) (*Response, error)
+	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...client.CallOption) (*GetInfoResponse, error)
 }
 
 type profileService struct {
@@ -109,6 +112,16 @@ func (c *profileService) ConfirmEmail(ctx context.Context, in *ConfirmEmailReque
 	return out, nil
 }
 
+func (c *profileService) GetInfo(ctx context.Context, in *GetInfoRequest, opts ...client.CallOption) (*GetInfoResponse, error) {
+	req := c.c.NewRequest(c.name, "Profile.GetInfo", in)
+	out := new(GetInfoResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Profile service
 
 type ProfileHandler interface {
@@ -116,6 +129,7 @@ type ProfileHandler interface {
 	UpdateStatus(context.Context, *UpdateStatusRequest, *Response) error
 	UpdateEmail(context.Context, *UpdateEmailRequest, *Response) error
 	ConfirmEmail(context.Context, *ConfirmEmailRequest, *Response) error
+	GetInfo(context.Context, *GetInfoRequest, *GetInfoResponse) error
 }
 
 func RegisterProfileHandler(s server.Server, hdlr ProfileHandler, opts ...server.HandlerOption) error {
@@ -124,6 +138,7 @@ func RegisterProfileHandler(s server.Server, hdlr ProfileHandler, opts ...server
 		UpdateStatus(ctx context.Context, in *UpdateStatusRequest, out *Response) error
 		UpdateEmail(ctx context.Context, in *UpdateEmailRequest, out *Response) error
 		ConfirmEmail(ctx context.Context, in *ConfirmEmailRequest, out *Response) error
+		GetInfo(ctx context.Context, in *GetInfoRequest, out *GetInfoResponse) error
 	}
 	type Profile struct {
 		profile
@@ -150,4 +165,8 @@ func (h *profileHandler) UpdateEmail(ctx context.Context, in *UpdateEmailRequest
 
 func (h *profileHandler) ConfirmEmail(ctx context.Context, in *ConfirmEmailRequest, out *Response) error {
 	return h.ProfileHandler.ConfirmEmail(ctx, in, out)
+}
+
+func (h *profileHandler) GetInfo(ctx context.Context, in *GetInfoRequest, out *GetInfoResponse) error {
+	return h.ProfileHandler.GetInfo(ctx, in, out)
 }

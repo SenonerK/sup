@@ -2,6 +2,7 @@ package handler
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/senonerk/sup/api/profile/forms"
 	"github.com/senonerk/sup/shared/aerr"
@@ -39,6 +40,7 @@ func New() *gin.Engine {
 	}
 
 	a := router.Group("/profile")
+	a.GET("/", srv.GetInfo)
 	a.PUT("/", srv.UpdateInfo)
 	a.POST("/status", srv.UpdateStatus)
 	a.PUT("/email", srv.UpdateEmail)
@@ -159,4 +161,31 @@ func (api *profileApi) ConfirmEmail(c *gin.Context) {
 	}
 
 	util.Ok(c, nil)
+}
+
+func (api *profileApi) GetInfo(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	res, err := api.Client.GetInfo(ctx, &profile.GetInfoRequest{
+		UserID: c.GetString(util.UserIDKey),
+	})
+
+	if err != nil {
+		c.Error(aerr.FromErr(err))
+		return
+	}
+
+	util.Ok(c, struct {
+		FirstName string    `json:"firstname"`
+		LastName  string    `json:"lastname"`
+		BirthDate time.Time `json:"birthdate"`
+		Status    string    `json:"status"`
+		Email     string    `json:"email"`
+	}{
+		FirstName: res.FirstName,
+		LastName:  res.LastName,
+		BirthDate: time.Unix(res.Birth, 0),
+		Status:    res.Status,
+		Email:     res.Email,
+	})
 }

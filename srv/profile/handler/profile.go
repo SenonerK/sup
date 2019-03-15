@@ -108,6 +108,22 @@ func (s *ProfileService) ConfirmEmail(ctx context.Context, req *proto.ConfirmEma
 	return nil
 }
 
+// GetInfo returns all info about user
+func (ProfileService) GetInfo(ctx context.Context, req *proto.GetInfoRequest, res *proto.GetInfoResponse) error {
+	p, err := getProfileByID(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	res.FirstName = p.FirstName
+	res.LastName = p.LastName
+	res.Birth = p.BirthDate.Unix()
+	res.Status = p.Status
+	res.Email = p.Email
+
+	return nil
+}
+
 func getProfileByID(id string) (*models.Profile, error) {
 	var p models.Profile
 	res := db.D().Where("user_id = ?", id).First(&p)
