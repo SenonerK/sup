@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/senonerk/sup/srv/notificator/proto/notificator"
+
 	"github.com/senonerk/sup/srv/auth/proto"
 
 	"github.com/senonerk/sup/srv/profile/models"
@@ -36,7 +38,8 @@ func main() {
 	service.Init()
 
 	profile.RegisterProfileHandler(service.Server(), &handler.ProfileService{
-		Auth: auth.NewAuthService("senonerk.sup.srv.auth", service.Client()),
+		Auth:        auth.NewAuthService("senonerk.sup.srv.auth", service.Client()),
+		Notificator: notify.NewNotificatorService("senonerk.sup.srv.notificator", service.Client()),
 	})
 
 	micro.RegisterSubscriber("sup.auth.NewUser", service.Server(), new(handler.NewUserSubscriber))

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/senonerk/sup/srv/notificator/proto/notificator"
+
 	"github.com/senonerk/sup/shared/tags"
 
 	"github.com/senonerk/sup/srv/auth/proto"
@@ -19,7 +21,8 @@ import (
 
 // ProfileService srv
 type ProfileService struct {
-	Auth auth.AuthService
+	Auth        auth.AuthService
+	Notificator notify.NotificatorService
 }
 
 // UpdateInfo updates First,Last -Name and Birthdate
@@ -73,7 +76,11 @@ func (s *ProfileService) UpdateEmail(ctx context.Context, req *proto.UpdateEmail
 		return err
 	}
 
-	// TODO: send email
+	go s.Notificator.SendEmail(ctx, &notify.SendEmailRequest{
+		Recipient: req.NewEmail,
+		Subject:   "New Email",
+		Body:      "Hello " + p.EmailToken,
+	})
 
 	t := db.D().Save(p)
 
