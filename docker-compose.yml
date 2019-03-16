@@ -60,6 +60,13 @@ services:
       - "5432:5432"
     volumes:
       - "profiledb:/var/lib/postgresql/data"
+  notificator_srv:
+    build: ./srv/notificator
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+    environment:
+      SENDGRID_API_KEY: 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
   explorer:
     command: --registry=consul --registry_address=consul:8500 web
     image: microhq/micro:latest

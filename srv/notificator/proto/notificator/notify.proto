@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service notificator {
+    rpc SendEmail (SendEmailRequest) returns (Response);
+}
+
+message SendEmailRequest {
+    string Recipient = 1;
+    string Subject = 2;
+    string Body = 3;
+}
+
+message Response {
+}
