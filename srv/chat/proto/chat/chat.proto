@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+service chat {
+    rpc Send(SendRequest) returns (Response);
+    rpc Receive(ReceiveRequest) returns (ReceiveResponse);
+}
+
+message ReceiveRequest {
+    string userID = 1;
+}
+
+message ReceiveResponse {
+    repeated UserChat Chats = 1;
+}
+
+message UserChat {
+    string userID = 1;
+    repeated string messages = 2;
+}
+
+message SendRequest {
+    string fromUserID = 1;
+    string toUserID = 2;
+    string message = 3;
+}
+
+message Response {
+}

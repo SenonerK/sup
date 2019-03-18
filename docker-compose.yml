@@ -1,0 +1,95 @@
+version: "3.2"
+services:
+  consul:
+    command: -server -bootstrap -rejoin 
+    image: progrium/consul:latest
+  micro:
+    command: --registry=consul --registry_address=consul:8500 api --handler=http --namespace senonerk.sup.api
+    image: microhq/micro:latest
+    links:
+      - consul
+      - auth_api
+      - profile_api
+    ports:
+      - "8080:8080"
+  auth_api:
+    build: ./api/auth
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - auth_srv
+  auth_srv:
+    build: ./srv/auth
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - mongodb
+    environment:
+      DB_HOST: mongodb
+      DB_NAME: auth
+      DB_USER: root
+      DB_PASSWORD: secret
+      JWT_SECRET: supersecret
+      PASSWORD_HMAC_SECRET: ultrasecret
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    volumes:
+      - "mongodb:/data/db"
+  profile_api:
+    build: ./api/profile
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - profile_srv
+  profile_srv:
+    build: ./srv/profile
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - profiledb
+    environment:
+      DB_URI: "host=profiledb port=5432 dbname=profile user=postgres sslmode=disable"
+  profiledb:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - "profiledb:/var/lib/postgresql/data"
+  notificator_srv:
+    build: ./srv/notificator
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+    environment:
+      EMAIL_SERVER: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER: 4FI.sup@gmail.com
+      EMAIL_PASSWORD: "U@p%mg+)OH#>x22^9:I!-/bF@CbO3N\\X"
+  chat_srv:
+    build: ./srv/chat
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - mongodb
+    environment:
+      DB_HOST: mongodb
+      DB_NAME: chat
+      DB_USER: root
+      DB_PASSWORD: secret
+  explorer:
+    command: --registry=consul --registry_address=consul:8500 web
+    image: microhq/micro:latest
+    links:
+      - consul
+      - auth_srv
+      - profile_srv
+    ports:
+      - "8082:8082"
+volumes:
+  mongodb:
+  profiledb:
