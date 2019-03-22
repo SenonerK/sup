@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/senonerk/sup/srv/auth/proto"
 	"time"
 
 	"github.com/senonerk/sup/srv/chat/models"
@@ -35,7 +36,9 @@ func main() {
 
 	service.Init()
 
-	proto.RegisterChatHandler(service.Server(), handler.New())
+	proto.RegisterChatHandler(service.Server(), &handler.ChatService{
+		Auth: auth.NewAuthService("senonerk.sup.srv.auth", service.Client()),
+	})
 
 	if err := service.Run(); err != nil {
 		log.Fatal(err)

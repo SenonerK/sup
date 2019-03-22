@@ -2,48 +2,81 @@ package handler
 
 import (
 	"context"
+	"errors"
+	"time"
 
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/senonerk/sup/shared/tags"
+
+	"github.com/senonerk/sup/srv/auth/proto"
 	"github.com/senonerk/sup/srv/chat/db"
 	"github.com/senonerk/sup/srv/chat/models"
 
 	proto "github.com/senonerk/sup/srv/chat/proto/chat"
 )
 
-type chatService struct{}
-
-// New returns a service implementation
-func New() *chatService {
-	return &chatService{}
+// ChatService struct
+type ChatService struct {
+	Auth auth.AuthService
 }
 
-func (chatService) Send(ctx context.Context, req *proto.SendRequest, res *proto.Response) error {
+// Send sends
+func (c *ChatService) Send(ctx context.Context, req *proto.SendRequest, res *proto.Response) error {
+
+	_, err := c.Auth.CheckPermissions(ctx, &auth.CheckPermissionsRequest{
+		UserID:         req.FromUserID,
+		PermissionTags: []string{tags.PERMISSION_EMAIL},
+	})
+
+	if err != nil {
+		return errors.New("Email not confirmed")
+	}
 
 	usr := &models.Chat{
-		FromID:  req.FromUserID,
-		ToID:    req.ToUserID,
-		Message: req.Message,
+		FromID:     req.FromUserID,
+		ToID:       req.ToUserID,
+		Message:    req.Message,
+		ReceivedAt: time.Unix(0, 0),
+		ReadAt:     time.Unix(0, 0),
 	}
-	err, _ := db.D().New(usr)
+	err, _ = db.D().New(usr)
 	usr.Save()
 
 	return err
 }
 
-func (chatService) Receive(ctx context.Context, req *proto.ReceiveRequest, res *proto.ReceiveResponse) error {
+// Receive receives
+func (ChatService) Receive(ctx context.Context, req *proto.ReceiveRequest, res *proto.ReceiveResponse) error {
 
-	r := []*proto.UserChat{}
-	err := db.D().Pipe([]bson.M{
-		{"$match": bson.M{"toID": req.UserID}},
-		{"$group": bson.M{"_id": "$fromID", "messages": bson.M{"$push": "$message"}}},
-	}).All(&r)
+	var r []*models.Chat
+	err := db.D().Find(bson.M{
+		"toID":       req.UserID,
+		"receivedAt": time.Unix(0, 0),
+		"readAt":     time.Unix(0, 0),
+	}).Exec(&r)
 
 	if err != nil {
 		return err
 	}
 
-	res.Chats = r
+	res.Chats = convertChatsToProto(r)
 
 	return nil
+}
+
+func convertChatsToProto(chats []*models.Chat) (res []*proto.UserChat) {
+	for _, c := range chats {
+		res = append(res, &proto.UserChat{
+			FromID:     c.FromID,
+			ToID:       c.ToID,
+			Message:    c.Message,
+			ReceivedAt: c.ReceivedAt.Unix(),
+			ReadAt:     c.ReadAt.Unix(),
+			Deleted:    c.Deleted,
+			Id:         c.Id.Hex(),
+			CreatedAt:  c.CreatedAt.Unix(),
+		})
+	}
+	return res
 }

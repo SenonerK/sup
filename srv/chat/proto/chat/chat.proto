@@ -14,8 +14,14 @@ message ReceiveResponse {
 }
 
 message UserChat {
-    string userID = 1;
-    repeated string messages = 2;
+    string Id = 8;
+    string FromID = 1;
+    string ToID = 2;
+    string Message = 3;
+    int64 ReceivedAt = 4;
+    int64 ReadAt = 5;
+    int64 CreatedAt = 6;
+    bool Deleted = 7;
 }
 
 message SendRequest {
