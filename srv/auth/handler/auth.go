@@ -213,6 +213,10 @@ func (a *authService) NewToken(ctx context.Context, req *proto.NewTokenRequest, 
 
 func getUserByID(userID string) (*models.User, error) {
 	var user models.User
+	if !bson.IsObjectIdHex(userID) {
+		return nil, errors.New("Invalid UserID")
+	}
+
 	err := db.D().FindOne(bson.M{
 		"_id":     bson.ObjectIdHex(userID),
 		"deleted": false,
