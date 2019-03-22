@@ -132,7 +132,9 @@ func (ProfileService) GetInfo(ctx context.Context, req *proto.GetInfoRequest, re
 }
 
 func getProfileByID(id string) (*models.Profile, error) {
-	var p models.Profile
-	res := db.D().Where("user_id = ?", id).First(&p)
+	p := models.Profile{
+		UserID: id,
+	}
+	res := db.D().Where("user_id = ?", id).FirstOrCreate(&p)
 	return &p, res.Error
 }
