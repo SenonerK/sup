@@ -23,15 +23,15 @@ services:
     command: --registry=consul --registry_address=consul:8500
     links:
       - consul
-      - authdb
+      - mongodb
     environment:
-      DB_HOST: authdb
+      DB_HOST: mongodb
       DB_NAME: auth
       DB_USER: root
       DB_PASSWORD: secret
       JWT_SECRET: supersecret
       PASSWORD_HMAC_SECRET: ultrasecret
-  authdb:
+  mongodb:
     image: mongo
     ports:
       - "27017:27017"
@@ -39,7 +39,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
-      - "authdb:/data/db"
+      - "mongodb:/data/db"
   profile_api:
     build: ./api/profile
     command: --registry=consul --registry_address=consul:8500
@@ -68,8 +68,25 @@ services:
     environment:
       EMAIL_SERVER: smtp.gmail.com
       EMAIL_PORT: 587
-      EMAIL_USER: "*********"
-      EMAIL_PASSWORD: "*********"
+      EMAIL_USER: "*******"
+      EMAIL_PASSWORD: "***********"
+  chat_api:
+    build: ./api/chat
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - chat_srv
+  chat_srv:
+    build: ./srv/chat
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - mongodb
+    environment:
+      DB_HOST: mongodb
+      DB_NAME: chat
+      DB_USER: root
+      DB_PASSWORD: secret
   explorer:
     command: --registry=consul --registry_address=consul:8500 web
     image: microhq/micro:latest
@@ -80,5 +97,5 @@ services:
     ports:
       - "8082:8082"
 volumes:
-  authdb:
+  mongodb:
   profiledb:
