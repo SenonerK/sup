@@ -13,3 +13,5 @@
 *.out
 
 docker-compose.yml
+
+.idea
