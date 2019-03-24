@@ -72,7 +72,7 @@ func (api *profileAPI) UpdateInfo(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -99,7 +99,7 @@ func (api *profileAPI) UpdateStatus(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -130,7 +130,7 @@ func (api *profileAPI) UpdateEmail(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -157,7 +157,7 @@ func (api *profileAPI) ConfirmEmail(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -172,7 +172,7 @@ func (api *profileAPI) GetInfo(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 

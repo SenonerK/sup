@@ -58,7 +58,7 @@ func (api *authApi) Login(c *gin.Context) {
 
 	res, err := api.Client.Login(ctx, &req)
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -91,7 +91,7 @@ func (api *authApi) Register(c *gin.Context) {
 
 	_, err := api.Client.Register(ctx, &req)
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -107,7 +107,7 @@ func (api *authApi) NewToken(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -155,7 +155,7 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -165,7 +165,7 @@ func (api *authApi) ChangePassword(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 

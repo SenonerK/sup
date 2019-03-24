@@ -3,8 +3,6 @@ package middlewares
 import (
 	"strings"
 
-	"github.com/senonerk/sup/shared/aerr"
-
 	"github.com/micro/go-micro/client"
 	"github.com/senonerk/sup/srv/auth/proto"
 
@@ -29,7 +27,7 @@ func AuthenticatedRoute() gin.HandlerFunc {
 				})
 
 				if err != nil {
-					c.Error(aerr.FromErr(err))
+					c.Error(err)
 					c.Abort()
 					return
 				}

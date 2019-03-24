@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/senonerk/sup/api/chat/forms"
-	"github.com/senonerk/sup/shared/aerr"
 	"github.com/senonerk/sup/shared/http/util"
 	"github.com/senonerk/sup/srv/chat/proto/chat"
 
@@ -59,7 +58,7 @@ func (api *chatAPI) Send(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
@@ -74,7 +73,7 @@ func (api *chatAPI) ReceiveNew(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.Error(aerr.FromErr(err))
+		c.Error(err)
 		return
 	}
 
