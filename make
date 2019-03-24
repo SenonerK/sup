@@ -17,15 +17,19 @@ if ! [ -d "$2" ]; then
     usage
 fi
 
-cd "$2"
-
 case "$1" in
     "build")
+        cd "$2"
         GOOS=linux go build -o $(basename "$2").bin
     ;;
 
     "proto")
+        cd "$2"
         protoc --go_out=. --micro_out=. *.proto
+    ;;
+
+    "docker")
+        docker-compose up -d --build $(basename "$2")_$(dirname "$2")
     ;;
 
     *)
