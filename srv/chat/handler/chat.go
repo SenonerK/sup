@@ -51,6 +51,24 @@ func (ChatService) Receive(ctx context.Context, req *proto.ReceiveRequest, res *
 
 	var r []*models.Chat
 	err := db.D().Find(bson.M{
+		"toID":      req.UserID,
+		"createdAt": bson.M{"$lt": time.Unix(req.From, 0)},
+	}).Sort("-createdAt").Skip(int(req.Skip)).Limit(int(req.Amount)).Exec(&r)
+
+	if err != nil {
+		return err
+	}
+
+	res.Chats = convertChatsToProto(r)
+
+	return nil
+}
+
+// ReceiveNew rn
+func (ChatService) ReceiveNew(ctx context.Context, req *proto.ReceiveNewRequest, res *proto.ReceiveResponse) error {
+
+	var r []*models.Chat
+	err := db.D().Find(bson.M{
 		"toID":       req.UserID,
 		"receivedAt": time.Unix(0, 0),
 		"readAt":     time.Unix(0, 0),

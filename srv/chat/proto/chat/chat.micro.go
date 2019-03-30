@@ -9,6 +9,7 @@ It is generated from these files:
 
 It has these top-level messages:
 	ReceiveRequest
+	ReceiveNewRequest
 	ReceiveResponse
 	UserChat
 	SendRequest
@@ -47,6 +48,7 @@ var _ server.Option
 type ChatService interface {
 	Send(ctx context.Context, in *SendRequest, opts ...client.CallOption) (*Response, error)
 	Receive(ctx context.Context, in *ReceiveRequest, opts ...client.CallOption) (*ReceiveResponse, error)
+	ReceiveNew(ctx context.Context, in *ReceiveNewRequest, opts ...client.CallOption) (*ReceiveResponse, error)
 }
 
 type chatService struct {
@@ -87,17 +89,29 @@ func (c *chatService) Receive(ctx context.Context, in *ReceiveRequest, opts ...c
 	return out, nil
 }
 
+func (c *chatService) ReceiveNew(ctx context.Context, in *ReceiveNewRequest, opts ...client.CallOption) (*ReceiveResponse, error) {
+	req := c.c.NewRequest(c.name, "Chat.ReceiveNew", in)
+	out := new(ReceiveResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Chat service
 
 type ChatHandler interface {
 	Send(context.Context, *SendRequest, *Response) error
 	Receive(context.Context, *ReceiveRequest, *ReceiveResponse) error
+	ReceiveNew(context.Context, *ReceiveNewRequest, *ReceiveResponse) error
 }
 
 func RegisterChatHandler(s server.Server, hdlr ChatHandler, opts ...server.HandlerOption) error {
 	type chat interface {
 		Send(ctx context.Context, in *SendRequest, out *Response) error
 		Receive(ctx context.Context, in *ReceiveRequest, out *ReceiveResponse) error
+		ReceiveNew(ctx context.Context, in *ReceiveNewRequest, out *ReceiveResponse) error
 	}
 	type Chat struct {
 		chat
@@ -116,4 +130,8 @@ func (h *chatHandler) Send(ctx context.Context, in *SendRequest, out *Response) 
 
 func (h *chatHandler) Receive(ctx context.Context, in *ReceiveRequest, out *ReceiveResponse) error {
 	return h.ChatHandler.Receive(ctx, in, out)
+}
+
+func (h *chatHandler) ReceiveNew(ctx context.Context, in *ReceiveNewRequest, out *ReceiveResponse) error {
+	return h.ChatHandler.ReceiveNew(ctx, in, out)
 }

@@ -3,9 +3,17 @@ syntax = "proto3";
 service chat {
     rpc Send(SendRequest) returns (Response);
     rpc Receive(ReceiveRequest) returns (ReceiveResponse);
+    rpc ReceiveNew(ReceiveNewRequest) returns (ReceiveResponse);
 }
 
 message ReceiveRequest {
+    string userID = 1;
+    int32 amount = 2;
+    int32 skip = 3;
+    int64 from = 4;
+}
+
+message ReceiveNewRequest {
     string userID = 1;
 }
 
