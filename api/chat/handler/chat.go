@@ -1,6 +1,10 @@
 package handler
 
 import (
+	"strconv"
+
+	"github.com/senonerk/sup/shared/aerr"
+
 	"github.com/senonerk/sup/api/chat/forms"
 	"github.com/senonerk/sup/shared/http/util"
 	"github.com/senonerk/sup/srv/chat/proto/chat"
@@ -32,6 +36,7 @@ func New() *gin.Engine {
 
 	c := router.Group("/chat")
 	c.POST("/", srv.Send)
+	c.GET("/", srv.Receive)
 	c.GET("/new", srv.ReceiveNew)
 
 	return router
@@ -68,8 +73,58 @@ func (api *chatAPI) Send(c *gin.Context) {
 func (api *chatAPI) ReceiveNew(c *gin.Context) {
 	ctx := c.Request.Context()
 
+	res, err := api.Client.ReceiveNew(ctx, &chat.ReceiveNewRequest{
+		UserID: c.GetString(util.UserIDKey),
+	})
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	util.Ok(c, res)
+}
+
+func (api *chatAPI) Receive(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	amount, err := strconv.Atoi(c.Query("amount"))
+	if err != nil {
+		c.Error(&aerr.AppError{
+			Code:    400,
+			Message: "Invalid amount specified",
+		})
+		return
+	}
+
+	skip, err := strconv.Atoi(c.Query("skip"))
+	if err != nil {
+		c.Error(&aerr.AppError{
+			Code:    400,
+			Message: "Invalid skip specified",
+		})
+		return
+	}
+
+	from, err := strconv.Atoi(c.Query("from"))
+	if err != nil {
+		c.Error(&aerr.AppError{
+			Code:    400,
+			Message: "Invalid from specified",
+		})
+		return
+	}
+
+	if amount < 10 {
+		c.Error(util.ErrBadRequest())
+		return
+	}
+
 	res, err := api.Client.Receive(ctx, &chat.ReceiveRequest{
 		UserID: c.GetString(util.UserIDKey),
+		Amount: int32(amount),
+		Skip:   int32(skip),
+		From:   int64(from),
 	})
 
 	if err != nil {
