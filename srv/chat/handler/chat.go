@@ -33,15 +33,15 @@ func (c *ChatService) Send(ctx context.Context, req *proto.SendRequest, res *pro
 		return errors.New("Email not confirmed")
 	}
 
-	usr := &models.Chat{
+	chat := &models.Chat{
 		FromID:     req.FromUserID,
 		ToID:       req.ToUserID,
 		Message:    req.Message,
 		ReceivedAt: time.Unix(0, 0),
 		ReadAt:     time.Unix(0, 0),
 	}
-	err, _ = db.D().New(usr)
-	usr.Save()
+	err, _ = db.D().New(chat)
+	chat.Save()
 
 	return err
 }

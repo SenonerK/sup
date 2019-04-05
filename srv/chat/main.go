@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/senonerk/sup/srv/auth/proto"
 	"time"
+
+	"github.com/senonerk/sup/srv/auth/proto"
 
 	"github.com/senonerk/sup/srv/chat/models"
 
