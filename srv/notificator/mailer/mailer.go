@@ -14,7 +14,7 @@ import (
 // New creates new daemon
 func New() chan *gomail.Message {
 
-	send := make(chan *gomail.Message)
+	send := make(chan *gomail.Message, 50)
 
 	go func() {
 		port, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
