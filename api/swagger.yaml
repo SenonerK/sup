@@ -1,0 +1,271 @@
+---
+swagger: "2.0"
+info:
+  description: ""
+  version: "1.0.0"
+  title: "sup API"
+  contact: {}
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /auth/register:
+    post:
+      summary: "Register user"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"username\": \"test\",\n  \"password\": \"pass\"\
+            \n}"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+          examples:
+            application/json: "{\n  \"data\": null,\n  \"message\": \"Successful\"\
+              \n}"
+        400:
+          description: "Status 400"
+          schema:
+            type: "object"
+          examples:
+            application/json: "{\n  \"message\": \"User exists already\"\n}"
+  /auth/login:
+    post:
+      summary: "Login"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"username\":\"john\",\n  \"password\":\"SecretPasswd\"\
+            \n}"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+          examples:
+            application/json: "{\n  \"data\": {\n    \"token\": \" pe9fwhbpebw\"\n\
+              \  },\n  \"message\": \"Successful\"\n}"
+        400:
+          description: "Status 400"
+          schema:
+            type: "object"
+          examples:
+            application/json: "{\n  \"message\": \"Bad Request\"\n}"
+  /auth/password:
+    put:
+      summary: "Change password"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"oldpassword\": \"pass\",\n  \"newpassword\": \"\
+            1234\"\n}"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+  /auth/token:
+    get:
+      summary: "Request new Token"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+          examples:
+            application/json: "{\n  \"data\": {\n    \"token\": \"2o7b3bgnx2xshjsahlHA\"\
+              \n  },\n  \"message\": \"Successful\"\n}"
+  /profile/status:
+    post:
+      summary: "New status"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"newstatus\": \"hello there\"\n}"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+  /profile/:
+    get:
+      summary: "Information"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+          examples:
+            application/json: "{\n    \"data\": {\n        \"firstname\": \"John\"\
+              ,\n        \"lastname\": \"Doe\",\n        \"birthdate\": \"2018-09-22T12:42:31Z\"\
+              ,\n        \"status\": \"hoila\",\n        \"email\": \"123@ee.it\"\n\
+              \    },\n    \"message\": \"Success\"\n}"
+      security:
+      - User Token: []
+    put:
+      summary: "Update info"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"firstname\": \"Michael\",\n  \"lastname\": \"\
+            Gates\",\n  \"birthday\": \"1997-09-22T19:42:31+07:00\"\n}"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+  /profile/email:
+    post:
+      summary: "Confirm Email"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"token\": \"9327098239632273z029z3\"\n}"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+    put:
+      summary: "Update Email"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"newemail\": \"321@ee.it\"\n}"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+  /:
+    get:
+      summary: "Receive messages"
+      parameters:
+      - name: "amount"
+        in: "query"
+        required: true
+        type: "integer"
+        x-example: 12
+      - name: "skip"
+        in: "query"
+        required: true
+        type: "integer"
+        x-example: 24
+      - name: "from"
+        in: "query"
+        required: true
+        type: "string"
+        x-example: "1554458127"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+    post:
+      summary: "Send message"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"to\": \"zs88gpsad8pasp87as\",\n  \"message\":\
+            \ \"Hoi\"\n}"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+  /new:
+    get:
+      summary: "Receive new"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+  /:what:
+    put:
+      summary: "Update read/receive"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+        x-examples:
+          application/json: "{\n  \"chatid\":\"dgiuiofo8723o7d39nn\",\n  \"time\"\
+            : \"2019-04-06T16:25:32.760+02:00\"\n}"
+      responses:
+        200:
+          description: "Status 200"
+  /search:
+    get:
+      summary: "Search"
+      parameters:
+      - name: "query"
+        in: "query"
+        required: true
+        type: "string"
+        x-example: "Michael"
+      responses:
+        200:
+          description: "Status 200"
+      security:
+      - User Token: []
+securityDefinitions:
+  User Token:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
