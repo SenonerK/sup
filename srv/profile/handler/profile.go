@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/senonerk/sup/srv/notificator/proto/notificator"
@@ -129,6 +130,24 @@ func (ProfileService) GetInfo(ctx context.Context, req *proto.GetInfoRequest, re
 	res.Email = p.Email
 
 	return nil
+}
+
+func (ProfileService) Search(ctx context.Context, req *proto.SearchRequest, res *proto.SearchResponse) error {
+	q := fmt.Sprintf("%%%v%%", req.Query)
+	var profiles []models.Profile
+	qres := db.D().Where("first_name LIKE ? OR last_name LIKE ?", q, q).Find(&profiles)
+
+	var ress []*proto.SearchUser
+	for _, p := range profiles {
+		ress = append(ress, &proto.SearchUser{
+			UserID: p.UserID,
+			Name:   p.FirstName + " " + p.LastName,
+		})
+	}
+
+	res.Users = ress
+
+	return qres.Error
 }
 
 func getProfileByID(id string) (*models.Profile, error) {

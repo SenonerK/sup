@@ -8,6 +8,9 @@ It is generated from these files:
 	profile.proto
 
 It has these top-level messages:
+	SearchRequest
+	SearchResponse
+	SearchUser
 	GetInfoRequest
 	GetInfoResponse
 	UpdateStatusRequest
@@ -52,6 +55,7 @@ type ProfileService interface {
 	UpdateEmail(ctx context.Context, in *UpdateEmailRequest, opts ...client.CallOption) (*Response, error)
 	ConfirmEmail(ctx context.Context, in *ConfirmEmailRequest, opts ...client.CallOption) (*Response, error)
 	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...client.CallOption) (*GetInfoResponse, error)
+	Search(ctx context.Context, in *SearchRequest, opts ...client.CallOption) (*SearchResponse, error)
 }
 
 type profileService struct {
@@ -122,6 +126,16 @@ func (c *profileService) GetInfo(ctx context.Context, in *GetInfoRequest, opts .
 	return out, nil
 }
 
+func (c *profileService) Search(ctx context.Context, in *SearchRequest, opts ...client.CallOption) (*SearchResponse, error) {
+	req := c.c.NewRequest(c.name, "Profile.Search", in)
+	out := new(SearchResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Profile service
 
 type ProfileHandler interface {
@@ -130,6 +144,7 @@ type ProfileHandler interface {
 	UpdateEmail(context.Context, *UpdateEmailRequest, *Response) error
 	ConfirmEmail(context.Context, *ConfirmEmailRequest, *Response) error
 	GetInfo(context.Context, *GetInfoRequest, *GetInfoResponse) error
+	Search(context.Context, *SearchRequest, *SearchResponse) error
 }
 
 func RegisterProfileHandler(s server.Server, hdlr ProfileHandler, opts ...server.HandlerOption) error {
@@ -139,6 +154,7 @@ func RegisterProfileHandler(s server.Server, hdlr ProfileHandler, opts ...server
 		UpdateEmail(ctx context.Context, in *UpdateEmailRequest, out *Response) error
 		ConfirmEmail(ctx context.Context, in *ConfirmEmailRequest, out *Response) error
 		GetInfo(ctx context.Context, in *GetInfoRequest, out *GetInfoResponse) error
+		Search(ctx context.Context, in *SearchRequest, out *SearchResponse) error
 	}
 	type Profile struct {
 		profile
@@ -169,4 +185,8 @@ func (h *profileHandler) ConfirmEmail(ctx context.Context, in *ConfirmEmailReque
 
 func (h *profileHandler) GetInfo(ctx context.Context, in *GetInfoRequest, out *GetInfoResponse) error {
 	return h.ProfileHandler.GetInfo(ctx, in, out)
+}
+
+func (h *profileHandler) Search(ctx context.Context, in *SearchRequest, out *SearchResponse) error {
+	return h.ProfileHandler.Search(ctx, in, out)
 }

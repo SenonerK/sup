@@ -6,6 +6,20 @@ service profile {
     rpc UpdateEmail(UpdateEmailRequest) returns (Response);
     rpc ConfirmEmail(ConfirmEmailRequest) returns (Response);
     rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+    rpc Search(SearchRequest) returns (SearchResponse);
+}
+
+message SearchRequest {
+    string query = 1;
+}
+
+message SearchResponse {
+    repeated SearchUser users = 1;
+}
+
+message SearchUser {
+    string userID = 1;
+    string name = 2;
 }
 
 message GetInfoRequest {
