@@ -83,11 +83,52 @@ func (ChatService) ReceiveNew(ctx context.Context, req *proto.ReceiveNewRequest,
 	return nil
 }
 
+func (ChatService) Read(ctx context.Context, req *proto.UpdateRequest, res *proto.Response) error {
+
+	if !bson.IsObjectIdHex(req.ChatID) {
+		return errors.New("Invalid chat ID")
+	}
+
+	var r models.Chat
+	err := db.D().FindOne(bson.M{
+		"toID": req.UserID,
+		"_id":  bson.ObjectIdHex(req.ChatID),
+	}).Exec(&r)
+
+	if err != nil {
+		return err
+	}
+
+	r.ReadAt = time.Unix(req.When, 0)
+
+	return r.Save()
+}
+
+func (ChatService) Received(ctx context.Context, req *proto.UpdateRequest, res *proto.Response) error {
+
+	if !bson.IsObjectIdHex(req.ChatID) {
+		return errors.New("Invalid chat ID")
+	}
+
+	var r models.Chat
+	err := db.D().FindOne(bson.M{
+		"toID": req.UserID,
+		"_id":  bson.ObjectIdHex(req.ChatID),
+	}).Exec(&r)
+
+	if err != nil {
+		return err
+	}
+
+	r.ReceivedAt = time.Unix(req.When, 0)
+
+	return r.Save()
+}
+
 func convertChatsToProto(chats []*models.Chat) (res []*proto.UserChat) {
 	for _, c := range chats {
 		res = append(res, &proto.UserChat{
 			FromID:     c.FromID,
-			ToID:       c.ToID,
 			Message:    c.Message,
 			ReceivedAt: c.ReceivedAt.Unix(),
 			ReadAt:     c.ReadAt.Unix(),

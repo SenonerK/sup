@@ -10,6 +10,7 @@ It is generated from these files:
 It has these top-level messages:
 	ReceiveRequest
 	ReceiveNewRequest
+	UpdateRequest
 	ReceiveResponse
 	UserChat
 	SendRequest
@@ -49,6 +50,8 @@ type ChatService interface {
 	Send(ctx context.Context, in *SendRequest, opts ...client.CallOption) (*Response, error)
 	Receive(ctx context.Context, in *ReceiveRequest, opts ...client.CallOption) (*ReceiveResponse, error)
 	ReceiveNew(ctx context.Context, in *ReceiveNewRequest, opts ...client.CallOption) (*ReceiveResponse, error)
+	Read(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*Response, error)
+	Received(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*Response, error)
 }
 
 type chatService struct {
@@ -99,12 +102,34 @@ func (c *chatService) ReceiveNew(ctx context.Context, in *ReceiveNewRequest, opt
 	return out, nil
 }
 
+func (c *chatService) Read(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "Chat.Read", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatService) Received(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "Chat.Received", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Chat service
 
 type ChatHandler interface {
 	Send(context.Context, *SendRequest, *Response) error
 	Receive(context.Context, *ReceiveRequest, *ReceiveResponse) error
 	ReceiveNew(context.Context, *ReceiveNewRequest, *ReceiveResponse) error
+	Read(context.Context, *UpdateRequest, *Response) error
+	Received(context.Context, *UpdateRequest, *Response) error
 }
 
 func RegisterChatHandler(s server.Server, hdlr ChatHandler, opts ...server.HandlerOption) error {
@@ -112,6 +137,8 @@ func RegisterChatHandler(s server.Server, hdlr ChatHandler, opts ...server.Handl
 		Send(ctx context.Context, in *SendRequest, out *Response) error
 		Receive(ctx context.Context, in *ReceiveRequest, out *ReceiveResponse) error
 		ReceiveNew(ctx context.Context, in *ReceiveNewRequest, out *ReceiveResponse) error
+		Read(ctx context.Context, in *UpdateRequest, out *Response) error
+		Received(ctx context.Context, in *UpdateRequest, out *Response) error
 	}
 	type Chat struct {
 		chat
@@ -134,4 +161,12 @@ func (h *chatHandler) Receive(ctx context.Context, in *ReceiveRequest, out *Rece
 
 func (h *chatHandler) ReceiveNew(ctx context.Context, in *ReceiveNewRequest, out *ReceiveResponse) error {
 	return h.ChatHandler.ReceiveNew(ctx, in, out)
+}
+
+func (h *chatHandler) Read(ctx context.Context, in *UpdateRequest, out *Response) error {
+	return h.ChatHandler.Read(ctx, in, out)
+}
+
+func (h *chatHandler) Received(ctx context.Context, in *UpdateRequest, out *Response) error {
+	return h.ChatHandler.Received(ctx, in, out)
 }

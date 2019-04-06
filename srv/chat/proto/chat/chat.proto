@@ -4,6 +4,8 @@ service chat {
     rpc Send(SendRequest) returns (Response);
     rpc Receive(ReceiveRequest) returns (ReceiveResponse);
     rpc ReceiveNew(ReceiveNewRequest) returns (ReceiveResponse);
+    rpc Read(UpdateRequest)returns(Response);
+    rpc Received(UpdateRequest)returns(Response);
 }
 
 message ReceiveRequest {
@@ -15,6 +17,12 @@ message ReceiveRequest {
 
 message ReceiveNewRequest {
     string userID = 1;
+}
+
+message UpdateRequest {
+    string userID = 1;
+    int64 when =2;
+    string chatID = 3;
 }
 
 message ReceiveResponse {
