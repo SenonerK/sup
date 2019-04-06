@@ -8,8 +8,6 @@ services:
     image: microhq/micro:latest
     links:
       - consul
-      - auth_api
-      - profile_api
     ports:
       - "8080:8080"
   auth_api:
@@ -87,13 +85,17 @@ services:
       DB_NAME: chat
       DB_USER: root
       DB_PASSWORD: secret
+  search_api:
+    build: ./api/search
+    command: --registry=consul --registry_address=consul:8500
+    links:
+      - consul
+      - profile_srv
   explorer:
     command: --registry=consul --registry_address=consul:8500 web
     image: microhq/micro:latest
     links:
       - consul
-      - auth_srv
-      - profile_srv
     ports:
       - "8082:8082"
 volumes:
