@@ -38,6 +38,7 @@ func New() *gin.Engine {
 	c.POST("/", srv.Send)
 	c.GET("/", srv.Receive)
 	c.GET("/new", srv.ReceiveNew)
+	c.PUT("/:what", srv.Update)
 
 	return router
 }
@@ -133,4 +134,45 @@ func (api *chatAPI) Receive(c *gin.Context) {
 	}
 
 	util.Ok(c, res)
+}
+
+func (api *chatAPI) Update(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	var req forms.Update
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(util.ErrInavlidForm())
+		return
+	}
+
+	if req.ChatID == "" || req.Timestamp.Unix() <= 0 {
+		c.Error(util.ErrBadRequest())
+		return
+	}
+
+	rpcreq := &chat.UpdateRequest{
+		UserID: c.GetString(util.UserIDKey),
+		ChatID: req.ChatID,
+		When:   req.Timestamp.Unix(),
+	}
+
+	var err error
+	if what := c.Param("what"); what == "read" {
+		_, err = api.Client.Read(ctx, rpcreq)
+	} else if what == "receive" {
+		_, err = api.Client.Received(ctx, rpcreq)
+	} else {
+		c.Error(&aerr.AppError{
+			Code:    400,
+			Message: "Incorrect parameter specified",
+		})
+		return
+	}
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	util.Ok(c, nil)
 }
