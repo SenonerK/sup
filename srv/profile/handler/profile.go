@@ -135,7 +135,7 @@ func (ProfileService) GetInfo(ctx context.Context, req *proto.GetInfoRequest, re
 func (ProfileService) Search(ctx context.Context, req *proto.SearchRequest, res *proto.SearchResponse) error {
 	q := fmt.Sprintf("%%%v%%", req.Query)
 	var profiles []models.Profile
-	qres := db.D().Where("first_name LIKE ? OR last_name LIKE ?", q, q).Find(&profiles)
+	qres := db.D().Where("(first_name LIKE ? OR last_name LIKE ?) AND first_name != '' AND last_name != ''", q, q).Find(&profiles)
 
 	var ress []*proto.SearchUser
 	for _, p := range profiles {
