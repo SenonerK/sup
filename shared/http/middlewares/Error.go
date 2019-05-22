@@ -1,12 +1,9 @@
 package middlewares
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/senonerk/sup/shared/aerr"
-	"github.com/senonerk/sup/shared/mode"
 )
 
 // ErrorReporter catches http errors and composes a json response
@@ -23,14 +20,7 @@ func ErrorReporter() gin.HandlerFunc {
 			case *aerr.AppError:
 				parsedError = err.(*aerr.AppError)
 			default:
-				msg := aerr.FromErr(err).Error()
-				if mode.Prod() {
-					msg = "Internal Server Error"
-				}
-				parsedError = &aerr.AppError{
-					Code:    http.StatusInternalServerError,
-					Message: msg,
-				}
+				parsedError = aerr.FromErr(err)
 			}
 
 			c.JSON(parsedError.Code, gin.H{"message": parsedError.Message})
