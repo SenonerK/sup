@@ -11,7 +11,7 @@ func (e *AppError) Error() string {
 	return e.Message
 }
 
-func FromErr(err error) error {
+func FromErr(err error) *AppError {
 	return &AppError{
 		Code:    500,
 		Message: err.Error(),
