@@ -28,6 +28,7 @@ func New() *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middlewares.ErrorReporter())
+	router.Use(middlewares.CORSMiddleware())
 
 	srv := authApi{
 		Client: auth.NewAuthService("senonerk.sup.srv.auth", client.DefaultClient),

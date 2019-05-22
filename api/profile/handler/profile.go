@@ -34,6 +34,7 @@ func New() *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middlewares.ErrorReporter())
+	router.Use(middlewares.CORSMiddleware())
 	router.Use(middlewares.AuthenticatedRoute())
 
 	srv := profileAPI{
